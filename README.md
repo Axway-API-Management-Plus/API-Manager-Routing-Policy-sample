@@ -10,23 +10,23 @@ This artefact was successfully tested for the following versions:
 
 
 ## Install
-1. Create a Routing Policy (Could simply have one filter to route to a backend or have a branch to route to backend services based on incoming content)
+1 Create a Routing Policy (Could simply have one filter to route to a backend or have a branch to route to backend services based on incoming content)
 
 ![alt text][Screenshot1]
 [Screenshot1]: https://github.com/Axway-API-Management/API-Manager-Routing-Policy-sample/blob/master/Screenshot1.png  "Screenshot1"   
 
-2. Add the routing policy in Policy Studio under Server Settings > API Manager > Routing Policies and deploy so it is available within API Manager UI
+2 Add the routing policy in Policy Studio under Server Settings > API Manager > Routing Policies and deploy so it is available within API Manager UI
 
 ![alt text][Screenshot2]
 [Screenshot2]: https://github.com/Axway-API-Management/API-Manager-Routing-Policy-sample/blob/master/Screenshot2.png  "Screenshot2"   
 
 
-3. Create a dummy Backend API (the URI could be valid or dummy) and a Front-end API based on this. Then in the Outbound tab, select the policy in the Default Method Routing dropdown
+3 Create a dummy Backend API (the URI could be valid or dummy) and a Front-end API based on this. Then in the Outbound tab, select the policy in the Default Method Routing dropdown
 
 ![alt text][Screenshot3]
 [Screenshot3]: https://github.com/Axway-API-Management/API-Manager-Routing-Policy-sample/blob/master/Screenshot3.png  "Screenshot3"   
 
-4. Save/Publish the Front-end API and test (use HTTP header Backend-Service to pass the required backend service to be routed to)
+4 Save/Publish the Front-end API and test (use HTTP header Backend-Service to pass the required backend service to be routed to)
 
   * Traffic Monitor:
 
