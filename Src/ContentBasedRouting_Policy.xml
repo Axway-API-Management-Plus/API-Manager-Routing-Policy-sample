@@ -233,7 +233,7 @@
 			<key type='FilterCircuit'>
 				<id field='name' value='Content based Routing'/>
 				<key type='AttributeExtractHTTPHeaderFilter'>
-					<id field='name' value='Retrieve User-Agent from HTTP header'/>
+					<id field='name' value='Retrieve Backend-Service from HTTP header'/>
 				</key>
 			</key>
 		</key>
@@ -334,7 +334,7 @@
 	<fval name="logMask"><value>2</value></fval>
 	<fval name="logMaskType"><value>SERVICE</value></fval>
 	<fval name="logSuccess"><value>Extracted attribute from HTTP header</value></fval>
-	<fval name="name"><value>Retrieve User-Agent from HTTP header</value></fval>
+	<fval name="name"><value>Retrieve Backend-Service from HTTP header</value></fval>
 	<fval name="successNode"><value contentType="reference">
 		<key type='CircuitContainer'>
 			<id field='name' value='Routing'/>
