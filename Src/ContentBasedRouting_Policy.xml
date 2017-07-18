@@ -18,9 +18,9 @@
 		<type name="CircuitContainer" version="1"/>
 		<type name="CompareAttributeFilter" version="0"/>
 		<type name="ConnectToURLFilter" version="4"/>
-		<type name="ConnectionFilter" version="15"/>
+		<type name="ConnectionFilter" version="17"/>
 		<type name="ConversionFilter" version="0"/>
-		<type name="ESConfiguration" version="19"/>
+		<type name="ESConfiguration" version="21"/>
 		<type name="Entity" version="0"/>
 		<type name="Filter" version="5"/>
 		<type name="FilterCircuit" version="4"/>
@@ -33,7 +33,7 @@
 <entityStoreData>
 <entityType xmlns="http://www.vordel.com/2005/06/24/entityStore" abstract="true" extends="Entity" name="RootChild"/>
 <entityType xmlns="http://www.vordel.com/2005/06/24/entityStore" extends="RootChild" name="ESConfiguration">
-        <constant name="_version" type="integer" value="19"/>
+        <constant name="_version" type="integer" value="21"/>
         <!--
             Give this singleton a key.
         -->
@@ -152,7 +152,7 @@
         <field default="MATCH_ALL" name="matchingRule" type="string"/>
     </entityType>
 <entityType xmlns="http://www.vordel.com/2005/06/24/entityStore" extends="Filter" name="ConnectionFilter">
-    <constant name="_version" type="integer" value="15"/>
+    <constant name="_version" type="integer" value="17"/>
     <constant name="class" type="string" value="com.vordel.circuit.net.ConnectionFilter"/>
     <componentType cardinality="1" name="SaveToFileFilter"/>
     <field cardinality="?" name="profile" type="^NamedAuthnProfile"/>
@@ -161,7 +161,14 @@
     <field cardinality="*" name="caCerts" type="^Certificate"/>
     <field cardinality="*" name="sslUsers" type="^Certificate"/>
     <field cardinality="1" default="true" name="useRootCerts" type="boolean"/>
-    <field default="DEFAULT" name="ciphers" type="string"/> <!-- See OpenSSL "ciphers" manpage -->
+    <field default="FIPS:!SSLv3:!aNULL" name="ciphers" type="string"/> <!-- See OpenSSL "ciphers" manpage -->
+    <!-- set of tokens for advanced SSL options: nosslv2, nosslv3, etc. -->
+    <field cardinality="*" name="ssloptions" type="string">
+        <defaultValue>nosslv2</defaultValue>
+        <defaultValue>nosslv3</defaultValue>
+        <defaultValue>notlsv1</defaultValue>
+        <defaultValue>notlsv1_1</defaultValue>
+    </field>
 
     <field cardinality="?" default="0" name="sendProxyMode" type="boolean"/>	
     <field cardinality="?" default="0" name="forwardClientHostHeader" type="boolean"/>
@@ -171,13 +178,13 @@
     <field cardinality="1" default="false" name="sendReceivedContentHeaders" type="boolean"/>
     <field cardinality="1" default="true" name="handleRedirects" type="boolean"/>
     <field cardinality="1" default="false" name="performRetries" type="boolean"/>
-    <field cardinality="*" name="retryHTTPRanges" type="@HTTPStatusClass"/>
+    <field cardinality="*" name="retryHTTPRanges" type="^HTTPStatusClass"/>
     <field cardinality="1" default="5" name="retryCount" type="string"/>
     <field cardinality="1" default="500" name="retryLatency" type="string"/>
     <field cardinality="1" default="false" name="slaBreachAsFailure" type="boolean"/>
     <field cardinality="1" default="false" name="saveTransactionOnFailure" type="boolean"/>
     <field cardinality="1" default="false" name="runPolicyOnConnectionFailure" type="boolean"/>
-    <field cardinality="?" name="connectionFailurePolicy" type="@FilterCircuit"/>
+    <field cardinality="?" name="connectionFailurePolicy" type="^FilterCircuit"/>
     <field cardinality="?" name="proxyServer" type="^ProxyServer"/>
     <field cardinality="?" default="0" name="stickyness" type="integer"/>
     <field cardinality="?" default="unnamed" name="stickyCookieName" type="string"/>
@@ -205,173 +212,10 @@
 </entityStoreData>
 	]]></realizedTypes>
 </metaInfo>
-<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="CompareAttributeFilter">
-	<key type='CircuitContainer'>
-		<id field='name' value='Routing'/>
-		<key type='FilterCircuit'>
-			<id field='name' value='Content based Routing'/>
-		</key>
-	</key>
-	<fval name="matchingRule"><value>MATCH_ALL</value></fval>
-	<fval name="logSuccess"><value>Filter passed</value></fval>
-	<fval name="successNode"><value contentType="reference">
-		<key type='CircuitContainer'>
-			<id field='name' value='Routing'/>
-			<key type='FilterCircuit'>
-				<id field='name' value='Content based Routing'/>
-				<key type='ConnectToURLFilter'>
-					<id field='name' value='Connect/Route to Stock Quote API'/>
-				</key>
-			</key>
-		</key>
-	</value></fval>
-	<fval name="logFailure"><value>Filter failed</value></fval>
-	<fval name="failureNode"><value contentType="reference">
-		<key type='CircuitContainer'>
-			<id field='name' value='Routing'/>
-			<key type='FilterCircuit'>
-				<id field='name' value='Content based Routing'/>
-				<key type='CompareAttributeFilter'>
-					<id field='name' value='If backend = Exchange Rates'/>
-				</key>
-			</key>
-		</key>
-	</value></fval>
-	<fval name="logMaskType"><value>SERVICE</value></fval>
-	<fval name="abortProcessingOnLogError"><value>0</value></fval>
-	<fval name="name"><value>If backend = Stock Quote</value></fval>
-	<fval name="logMask"><value>2</value></fval>
-	<fval name="category"><value contentType="reference">
-		<key type='CategoryGroup'>
-			<id field='name' value='Filter Categories'/>
-			<key type='Category'>
-				<id field='name' value='miscellaneous'/>
-			</key>
-		</key>
-	</value></fval>
-	<fval name="logFatal"><value>Filter aborted due to exception</value></fval>
-</entity>
-<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="AttributeExtractHTTPHeaderFilter">
-	<key type='CircuitContainer'>
-		<id field='name' value='Routing'/>
-		<key type='FilterCircuit'>
-			<id field='name' value='Content based Routing'/>
-		</key>
-	</key>
-	<fval name="successNode"><value contentType="reference">
-		<key type='CircuitContainer'>
-			<id field='name' value='Routing'/>
-			<key type='FilterCircuit'>
-				<id field='name' value='Content based Routing'/>
-				<key type='CompareAttributeFilter'>
-					<id field='name' value='If backend = Stock Quote'/>
-				</key>
-			</key>
-		</key>
-	</value></fval>
-	<fval name="headerName"><value>Backend-Service</value></fval>
-	<fval name="abortProcessingOnLogError"><value>0</value></fval>
-	<fval name="logMask"><value>2</value></fval>
-	<fval name="base64Decode"><value>0</value></fval>
-	<fval name="logSuccess"><value>Extracted attribute from HTTP header</value></fval>
-	<fval name="logFailure"><value>Failed to extract attribute HTTP header</value></fval>
-	<fval name="useQueryParameter"><value>0</value></fval>
-	<fval name="logMaskType"><value>SERVICE</value></fval>
-	<fval name="name"><value>Retrieve User-Agent from HTTP header</value></fval>
-	<fval name="attributeName"><value>backendService</value></fval>
-	<fval name="category"><value contentType="reference">
-		<key type='CategoryGroup'>
-			<id field='name' value='Filter Categories'/>
-			<key type='Category'>
-				<id field='name' value='attribute'/>
-			</key>
-		</key>
-	</value></fval>
-	<fval name="logFatal"><value>Error occurred while extracting attributes from HTTP header. Error: ${circuit.exception}</value></fval>
-</entity>
-<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="ConnectToURLFilter">
-	<key type='CircuitContainer'>
-		<id field='name' value='Routing'/>
-		<key type='FilterCircuit'>
-			<id field='name' value='Content based Routing'/>
-		</key>
-	</key>
-	<fval name="sendReceivedContentHeaders"><value>0</value></fval>
-	<fval name="retryLatency"><value>500</value></fval>
-	<fval name="stickyCookieName"><value>unnamed</value></fval>
-	<fval name="logMask"><value>2</value></fval>
-	<fval name="body"><value>${content.body}</value></fval>
-	<fval name="slaBreachAsFailure"><value>0</value></fval>
-	<fval name="protoHeaders"><value>${http.headers}</value></fval>
-	<fval name="logFailure"><value>Failed to route request to endpoint.</value></fval>
-	<fval name="retryHTTPRanges"><value contentType="reference">-1</value></fval>
-	<fval name="runPolicyOnConnectionFailure"><value>0</value></fval>
-	<fval name="stickyness"><value>0</value></fval>
-	<fval name="ciphers"><value>DEFAULT</value></fval>
-	<fval name="forwardClientHostHeader"><value>0</value></fval>
-	<fval name="useRootCerts"><value>1</value></fval>
-	<fval name="transparentProxy"><value>0</value></fval>
-	<fval name="sslUsers"><value contentType="reference">-1</value></fval>
-	<fval name="stickyCookiePath"><value></value></fval>
-	<fval name="method"><value>${http.request.verb}</value></fval>
-	<fval name="stickyCookieDomain"><value></value></fval>
-	<fval name="proxyServer"><value contentType="reference">-1</value></fval>
-	<fval name="retryCount"><value>5</value></fval>
-	<fval name="abortProcessingOnLogError"><value>0</value></fval>
-	<fval name="profile"><value contentType="reference">-1</value></fval>
-	<fval name="handleRedirects"><value>1</value></fval>
-	<fval name="stickyCookieExpiry"><value>600000</value></fval>
-	<fval name="url"><value>http://www.google.com/finance/info?q=NASDAQ:MSFT,GOOG</value></fval>
-	<fval name="connectionFailurePolicy"><value contentType="reference">-1</value></fval>
-	<fval name="logSuccess"><value>Successfully routed request to endpoint</value></fval>
-	<fval name="performRetries"><value>0</value></fval>
-	<fval name="logMaskType"><value>SERVICE</value></fval>
-	<fval name="name"><value>Connect/Route to Stock Quote API</value></fval>
-	<fval name="saveTransactionOnFailure"><value>0</value></fval>
-	<fval name="category"><value contentType="reference">
-		<key type='CategoryGroup'>
-			<id field='name' value='Filter Categories'/>
-			<key type='Category'>
-				<id field='name' value='miscellaneous'/>
-			</key>
-		</key>
-	</value></fval>
-	<fval name="logFatal"><value>Error occurred while routing request to endpoint. Error: ${circuit.exception}</value></fval>
-	<fval name="sendProxyMode"><value>0</value></fval>
-	<fval name="caCerts"></fval>
-</entity>
-<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="AttributeCompare">
-	<key type='CircuitContainer'>
-		<id field='name' value='Routing'/>
-		<key type='FilterCircuit'>
-			<id field='name' value='Content based Routing'/>
-			<key type='CompareAttributeFilter'>
-				<id field='name' value='If backend = Stock Quote'/>
-			</key>
-		</key>
-	</key>
-	<fval name="expression"><value>stock</value></fval>
-	<fval name="matchType"><value>CONTAINS</value></fval>
-	<fval name="attrName"><value>${backendService}</value></fval>
-</entity>
 <entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="FilterCircuit">
 	<key type='CircuitContainer'>
 		<id field='name' value='Routing'/>
 	</key>
-	<fval name="name"><value>Content based Routing</value></fval>
-	<fval name="start"><value contentType="reference">
-		<key type='CircuitContainer'>
-			<id field='name' value='Routing'/>
-			<key type='FilterCircuit'>
-				<id field='name' value='Content based Routing'/>
-				<key type='AttributeExtractHTTPHeaderFilter'>
-					<id field='name' value='Retrieve User-Agent from HTTP header'/>
-				</key>
-			</key>
-		</key>
-	</value></fval>
-	<fval name="description"><value></value></fval>
-	<fval name="logMask"><value>3</value></fval>
 	<fval name="category"><value contentType="reference">
 		<key type='PolicyCategoryGroup'>
 			<id field='name' value='Policy Categories'/>
@@ -380,101 +224,20 @@
 			</key>
 		</key>
 	</value></fval>
-</entity>
-<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="CircuitContainer">
-	<fval name="name"><value>Routing</value></fval>
-</entity>
-<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="ChangeMessageFilter">
-	<key type='CircuitContainer'>
-		<id field='name' value='Routing'/>
-		<key type='FilterCircuit'>
-			<id field='name' value='Content based Routing'/>
-		</key>
-	</key>
-	<fval name="logSuccess"><value>Success in setting the message</value></fval>
-	<fval name="successNode"><value contentType="reference">
+	<fval name="description"><value></value></fval>
+	<fval name="logMask"><value>3</value></fval>
+	<fval name="name"><value>Content based Routing</value></fval>
+	<fval name="start"><value contentType="reference">
 		<key type='CircuitContainer'>
 			<id field='name' value='Routing'/>
 			<key type='FilterCircuit'>
 				<id field='name' value='Content based Routing'/>
-				<key type='Reflector'>
-					<id field='name' value='No Backend to route, return error message'/>
+				<key type='AttributeExtractHTTPHeaderFilter'>
+					<id field='name' value='Retrieve Backend-Service from HTTP header'/>
 				</key>
 			</key>
 		</key>
 	</value></fval>
-	<fval name="logFailure"><value>Failed in setting the message</value></fval>
-	<fval name="logMaskType"><value>SERVICE</value></fval>
-	<fval name="abortProcessingOnLogError"><value>0</value></fval>
-	<fval name="name"><value>Set error message</value></fval>
-	<fval name="logMask"><value>2</value></fval>
-	<fval name="body"><value>{ &quot;error&quot;: &quot;Invalid or no back-end service in request. Unable to route.&quot; }</value></fval>
-	<fval name="category"><value contentType="reference">
-		<key type='CategoryGroup'>
-			<id field='name' value='Filter Categories'/>
-			<key type='Category'>
-				<id field='name' value='miscellaneous'/>
-			</key>
-		</key>
-	</value></fval>
-	<fval name="outputContentType"><value>application/json</value></fval>
-	<fval name="logFatal"><value>Error in setting the message. Error: ${circuit.exception}</value></fval>
-</entity>
-<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="SaveToFileFilter">
-	<key type='CircuitContainer'>
-		<id field='name' value='Routing'/>
-		<key type='FilterCircuit'>
-			<id field='name' value='Content based Routing'/>
-			<key type='ConnectToURLFilter'>
-				<id field='name' value='Connect/Route to Exchange Rates API'/>
-			</key>
-		</key>
-	</key>
-	<fval name="fileName"><value>${id}.out</value></fval>
-	<fval name="abortProcessingOnLogError"><value>0</value></fval>
-	<fval name="logMask"><value>2</value></fval>
-	<fval name="maxFileSize"><value>1000</value></fval>
-	<fval name="includeHeaders"><value>0</value></fval>
-	<fval name="directory"><value>${environment.VINSTDIR}/message-archive</value></fval>
-	<fval name="logSuccess"><value>Filter passed</value></fval>
-	<fval name="maxNumberFiles"><value>500</value></fval>
-	<fval name="logFailure"><value>Filter failed</value></fval>
-	<fval name="logMaskType"><value>SERVICE</value></fval>
-	<fval name="name"><value>Persistence Details</value></fval>
-	<fval name="includeRequestLine"><value>0</value></fval>
-	<fval name="category"><value contentType="reference">
-		<key type='CategoryGroup'>
-			<id field='name' value='Filter Categories'/>
-			<key type='Category'>
-				<id field='name' value='miscellaneous'/>
-			</key>
-		</key>
-	</value></fval>
-	<fval name="logFatal"><value>Filter aborted due to exception</value></fval>
-</entity>
-<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="Reflector">
-	<key type='CircuitContainer'>
-		<id field='name' value='Routing'/>
-		<key type='FilterCircuit'>
-			<id field='name' value='Content based Routing'/>
-		</key>
-	</key>
-	<fval name="httpResponseStatus"><value>401</value></fval>
-	<fval name="logSuccess"><value>Successfully echoed back the message</value></fval>
-	<fval name="logFailure"><value>Failed to echo back the message</value></fval>
-	<fval name="logMaskType"><value>SERVICE</value></fval>
-	<fval name="abortProcessingOnLogError"><value>0</value></fval>
-	<fval name="name"><value>No Backend to route, return error message</value></fval>
-	<fval name="logMask"><value>2</value></fval>
-	<fval name="category"><value contentType="reference">
-		<key type='CategoryGroup'>
-			<id field='name' value='Filter Categories'/>
-			<key type='Category'>
-				<id field='name' value='miscellaneous'/>
-			</key>
-		</key>
-	</value></fval>
-	<fval name="logFatal"><value>Error occurred while echoing the message. Error: ${circuit.exception}</value></fval>
 </entity>
 <entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="CompareAttributeFilter">
 	<key type='CircuitContainer'>
@@ -483,20 +246,15 @@
 			<id field='name' value='Content based Routing'/>
 		</key>
 	</key>
-	<fval name="matchingRule"><value>MATCH_ALL</value></fval>
-	<fval name="logSuccess"><value>Filter passed</value></fval>
-	<fval name="successNode"><value contentType="reference">
-		<key type='CircuitContainer'>
-			<id field='name' value='Routing'/>
-			<key type='FilterCircuit'>
-				<id field='name' value='Content based Routing'/>
-				<key type='ConnectToURLFilter'>
-					<id field='name' value='Connect/Route to Exchange Rates API'/>
-				</key>
+	<fval name="abortProcessingOnLogError"><value>0</value></fval>
+	<fval name="category"><value contentType="reference">
+		<key type='CategoryGroup'>
+			<id field='name' value='Filter Categories'/>
+			<key type='Category'>
+				<id field='name' value='miscellaneous'/>
 			</key>
 		</key>
 	</value></fval>
-	<fval name="logFailure"><value>Filter failed</value></fval>
 	<fval name="failureNode"><value contentType="reference">
 		<key type='CircuitContainer'>
 			<id field='name' value='Routing'/>
@@ -508,109 +266,24 @@
 			</key>
 		</key>
 	</value></fval>
-	<fval name="logMaskType"><value>SERVICE</value></fval>
-	<fval name="abortProcessingOnLogError"><value>0</value></fval>
-	<fval name="name"><value>If backend = Exchange Rates</value></fval>
-	<fval name="logMask"><value>2</value></fval>
-	<fval name="category"><value contentType="reference">
-		<key type='CategoryGroup'>
-			<id field='name' value='Filter Categories'/>
-			<key type='Category'>
-				<id field='name' value='miscellaneous'/>
-			</key>
-		</key>
-	</value></fval>
-	<fval name="logFatal"><value>Filter aborted due to exception</value></fval>
-</entity>
-<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="SaveToFileFilter">
-	<key type='CircuitContainer'>
-		<id field='name' value='Routing'/>
-		<key type='FilterCircuit'>
-			<id field='name' value='Content based Routing'/>
-			<key type='ConnectToURLFilter'>
-				<id field='name' value='Connect/Route to Stock Quote API'/>
-			</key>
-		</key>
-	</key>
-	<fval name="fileName"><value>${id}.out</value></fval>
-	<fval name="abortProcessingOnLogError"><value>0</value></fval>
-	<fval name="logMask"><value>2</value></fval>
-	<fval name="maxFileSize"><value>1000</value></fval>
-	<fval name="includeHeaders"><value>0</value></fval>
-	<fval name="directory"><value>${environment.VINSTDIR}/message-archive</value></fval>
-	<fval name="logSuccess"><value>Filter passed</value></fval>
-	<fval name="maxNumberFiles"><value>500</value></fval>
 	<fval name="logFailure"><value>Filter failed</value></fval>
-	<fval name="logMaskType"><value>SERVICE</value></fval>
-	<fval name="name"><value>Persistence Details</value></fval>
-	<fval name="includeRequestLine"><value>0</value></fval>
-	<fval name="category"><value contentType="reference">
-		<key type='CategoryGroup'>
-			<id field='name' value='Filter Categories'/>
-			<key type='Category'>
-				<id field='name' value='miscellaneous'/>
-			</key>
-		</key>
-	</value></fval>
 	<fval name="logFatal"><value>Filter aborted due to exception</value></fval>
-</entity>
-<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="ESConfiguration">
-	<fval name="passphraseTest"><value>aHR0cDsvL3d3dy52b3JkZWwuY29t</value></fval>
-	<fval name="name"><value>Entity Store Configuration</value></fval>
-	<fval name="productKey"><value>VordelGateway</value></fval>
-	<fval name="version"><value>7.4.1</value></fval>
-</entity>
-<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="ConnectToURLFilter">
-	<key type='CircuitContainer'>
-		<id field='name' value='Routing'/>
-		<key type='FilterCircuit'>
-			<id field='name' value='Content based Routing'/>
-		</key>
-	</key>
-	<fval name="sendReceivedContentHeaders"><value>0</value></fval>
-	<fval name="retryLatency"><value>500</value></fval>
-	<fval name="successNode"><value contentType="reference">-1</value></fval>
-	<fval name="stickyCookieName"><value>unnamed</value></fval>
 	<fval name="logMask"><value>2</value></fval>
-	<fval name="body"><value>${content.body}</value></fval>
-	<fval name="slaBreachAsFailure"><value>0</value></fval>
-	<fval name="protoHeaders"><value>${http.headers}</value></fval>
-	<fval name="logFailure"><value>Failed to route request to endpoint.</value></fval>
-	<fval name="retryHTTPRanges"><value contentType="reference">-1</value></fval>
-	<fval name="runPolicyOnConnectionFailure"><value>0</value></fval>
-	<fval name="stickyness"><value>0</value></fval>
-	<fval name="ciphers"><value>DEFAULT</value></fval>
-	<fval name="forwardClientHostHeader"><value>0</value></fval>
-	<fval name="useRootCerts"><value>1</value></fval>
-	<fval name="transparentProxy"><value>0</value></fval>
-	<fval name="sslUsers"><value contentType="reference">-1</value></fval>
-	<fval name="stickyCookiePath"><value></value></fval>
-	<fval name="method"><value>${http.request.verb}</value></fval>
-	<fval name="stickyCookieDomain"><value></value></fval>
-	<fval name="proxyServer"><value contentType="reference">-1</value></fval>
-	<fval name="retryCount"><value>5</value></fval>
-	<fval name="abortProcessingOnLogError"><value>0</value></fval>
-	<fval name="profile"><value contentType="reference">-1</value></fval>
-	<fval name="handleRedirects"><value>1</value></fval>
-	<fval name="stickyCookieExpiry"><value>600000</value></fval>
-	<fval name="url"><value>http://api.fixer.io/latest</value></fval>
-	<fval name="connectionFailurePolicy"><value contentType="reference">-1</value></fval>
-	<fval name="logSuccess"><value>Successfully routed request to endpoint</value></fval>
-	<fval name="performRetries"><value>0</value></fval>
 	<fval name="logMaskType"><value>SERVICE</value></fval>
-	<fval name="name"><value>Connect/Route to Exchange Rates API</value></fval>
-	<fval name="saveTransactionOnFailure"><value>0</value></fval>
-	<fval name="category"><value contentType="reference">
-		<key type='CategoryGroup'>
-			<id field='name' value='Filter Categories'/>
-			<key type='Category'>
-				<id field='name' value='miscellaneous'/>
+	<fval name="logSuccess"><value>Filter passed</value></fval>
+	<fval name="matchingRule"><value>MATCH_ALL</value></fval>
+	<fval name="name"><value>If backend = Exchange Rates</value></fval>
+	<fval name="successNode"><value contentType="reference">
+		<key type='CircuitContainer'>
+			<id field='name' value='Routing'/>
+			<key type='FilterCircuit'>
+				<id field='name' value='Content based Routing'/>
+				<key type='ConnectToURLFilter'>
+					<id field='name' value='Connect/Route to Exchange Rates API'/>
+				</key>
 			</key>
 		</key>
 	</value></fval>
-	<fval name="logFatal"><value>Error occurred while routing request to endpoint. Error: ${circuit.exception}</value></fval>
-	<fval name="sendProxyMode"><value>0</value></fval>
-	<fval name="caCerts"></fval>
 </entity>
 <entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="AttributeCompare">
 	<key type='CircuitContainer'>
@@ -622,8 +295,355 @@
 			</key>
 		</key>
 	</key>
+	<fval name="attrName"><value>${backendService}</value></fval>
 	<fval name="expression"><value>exchange</value></fval>
 	<fval name="matchType"><value>CONTAINS</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="AttributeExtractHTTPHeaderFilter">
+	<key type='CircuitContainer'>
+		<id field='name' value='Routing'/>
+		<key type='FilterCircuit'>
+			<id field='name' value='Content based Routing'/>
+		</key>
+	</key>
+	<fval name="abortProcessingOnLogError"><value>0</value></fval>
+	<fval name="attributeName"><value>backendService</value></fval>
+	<fval name="base64Decode"><value>0</value></fval>
+	<fval name="category"><value contentType="reference">
+		<key type='CategoryGroup'>
+			<id field='name' value='Filter Categories'/>
+			<key type='Category'>
+				<id field='name' value='attribute'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="failureNode"><value contentType="reference">
+		<key type='CircuitContainer'>
+			<id field='name' value='Routing'/>
+			<key type='FilterCircuit'>
+				<id field='name' value='Content based Routing'/>
+				<key type='ChangeMessageFilter'>
+					<id field='name' value='Set error message'/>
+				</key>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="headerName"><value>Backend-Service</value></fval>
+	<fval name="logFailure"><value>Failed to extract attribute HTTP header</value></fval>
+	<fval name="logFatal"><value>Error occurred while extracting attributes from HTTP header. Error: ${circuit.exception}</value></fval>
+	<fval name="logMask"><value>2</value></fval>
+	<fval name="logMaskType"><value>SERVICE</value></fval>
+	<fval name="logSuccess"><value>Extracted attribute from HTTP header</value></fval>
+	<fval name="name"><value>Retrieve Backend-Service from HTTP header</value></fval>
+	<fval name="successNode"><value contentType="reference">
+		<key type='CircuitContainer'>
+			<id field='name' value='Routing'/>
+			<key type='FilterCircuit'>
+				<id field='name' value='Content based Routing'/>
+				<key type='CompareAttributeFilter'>
+					<id field='name' value='If backend = Stock Quote'/>
+				</key>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="useQueryParameter"><value>0</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="CompareAttributeFilter">
+	<key type='CircuitContainer'>
+		<id field='name' value='Routing'/>
+		<key type='FilterCircuit'>
+			<id field='name' value='Content based Routing'/>
+		</key>
+	</key>
+	<fval name="abortProcessingOnLogError"><value>0</value></fval>
+	<fval name="category"><value contentType="reference">
+		<key type='CategoryGroup'>
+			<id field='name' value='Filter Categories'/>
+			<key type='Category'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="failureNode"><value contentType="reference">
+		<key type='CircuitContainer'>
+			<id field='name' value='Routing'/>
+			<key type='FilterCircuit'>
+				<id field='name' value='Content based Routing'/>
+				<key type='CompareAttributeFilter'>
+					<id field='name' value='If backend = Exchange Rates'/>
+				</key>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="logFailure"><value>Filter failed</value></fval>
+	<fval name="logFatal"><value>Filter aborted due to exception</value></fval>
+	<fval name="logMask"><value>2</value></fval>
+	<fval name="logMaskType"><value>SERVICE</value></fval>
+	<fval name="logSuccess"><value>Filter passed</value></fval>
+	<fval name="matchingRule"><value>MATCH_ALL</value></fval>
+	<fval name="name"><value>If backend = Stock Quote</value></fval>
+	<fval name="successNode"><value contentType="reference">
+		<key type='CircuitContainer'>
+			<id field='name' value='Routing'/>
+			<key type='FilterCircuit'>
+				<id field='name' value='Content based Routing'/>
+				<key type='ConnectToURLFilter'>
+					<id field='name' value='Connect/Route to Stock Quote API'/>
+				</key>
+			</key>
+		</key>
+	</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="AttributeCompare">
+	<key type='CircuitContainer'>
+		<id field='name' value='Routing'/>
+		<key type='FilterCircuit'>
+			<id field='name' value='Content based Routing'/>
+			<key type='CompareAttributeFilter'>
+				<id field='name' value='If backend = Stock Quote'/>
+			</key>
+		</key>
+	</key>
 	<fval name="attrName"><value>${backendService}</value></fval>
+	<fval name="expression"><value>stock</value></fval>
+	<fval name="matchType"><value>CONTAINS</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="ConnectToURLFilter">
+	<key type='CircuitContainer'>
+		<id field='name' value='Routing'/>
+		<key type='FilterCircuit'>
+			<id field='name' value='Content based Routing'/>
+		</key>
+	</key>
+	<fval name="abortProcessingOnLogError"><value>0</value></fval>
+	<fval name="body"><value>${content.body}</value></fval>
+	<fval name="caCerts"></fval>
+	<fval name="category"><value contentType="reference">
+		<key type='CategoryGroup'>
+			<id field='name' value='Filter Categories'/>
+			<key type='Category'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="ciphers"><value>DEFAULT</value></fval>
+	<fval name="connectionFailurePolicy"><value contentType="reference">-1</value></fval>
+	<fval name="forwardClientHostHeader"><value>0</value></fval>
+	<fval name="handleRedirects"><value>1</value></fval>
+	<fval name="logFailure"><value>Failed to route request to endpoint.</value></fval>
+	<fval name="logFatal"><value>Error occurred while routing request to endpoint. Error: ${circuit.exception}</value></fval>
+	<fval name="logMask"><value>2</value></fval>
+	<fval name="logMaskType"><value>SERVICE</value></fval>
+	<fval name="logSuccess"><value>Successfully routed request to endpoint</value></fval>
+	<fval name="method"><value>${http.request.verb}</value></fval>
+	<fval name="name"><value>Connect/Route to Stock Quote API</value></fval>
+	<fval name="performRetries"><value>0</value></fval>
+	<fval name="profile"><value contentType="reference">-1</value></fval>
+	<fval name="protoHeaders"><value>${http.headers}</value></fval>
+	<fval name="proxyServer"><value contentType="reference">-1</value></fval>
+	<fval name="retryCount"><value>5</value></fval>
+	<fval name="retryHTTPRanges"><value contentType="reference">-1</value></fval>
+	<fval name="retryLatency"><value>500</value></fval>
+	<fval name="runPolicyOnConnectionFailure"><value>0</value></fval>
+	<fval name="saveTransactionOnFailure"><value>0</value></fval>
+	<fval name="sendProxyMode"><value>0</value></fval>
+	<fval name="sendReceivedContentHeaders"><value>0</value></fval>
+	<fval name="slaBreachAsFailure"><value>0</value></fval>
+	<fval name="sslUsers"><value contentType="reference">-1</value></fval>
+	<fval name="ssloptions"></fval>
+	<fval name="stickyCookieDomain"><value></value></fval>
+	<fval name="stickyCookieExpiry"><value>600000</value></fval>
+	<fval name="stickyCookieName"><value>unnamed</value></fval>
+	<fval name="stickyCookiePath"><value></value></fval>
+	<fval name="stickyness"><value>0</value></fval>
+	<fval name="transparentProxy"><value>0</value></fval>
+	<fval name="url"><value>http://www.google.com/finance/info?q=NASDAQ:MSFT,GOOG</value></fval>
+	<fval name="useRootCerts"><value>1</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="SaveToFileFilter">
+	<key type='CircuitContainer'>
+		<id field='name' value='Routing'/>
+		<key type='FilterCircuit'>
+			<id field='name' value='Content based Routing'/>
+			<key type='ConnectToURLFilter'>
+				<id field='name' value='Connect/Route to Stock Quote API'/>
+			</key>
+		</key>
+	</key>
+	<fval name="abortProcessingOnLogError"><value>0</value></fval>
+	<fval name="category"><value contentType="reference">
+		<key type='CategoryGroup'>
+			<id field='name' value='Filter Categories'/>
+			<key type='Category'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="directory"><value>${environment.VINSTDIR}/message-archive</value></fval>
+	<fval name="fileName"><value>${id}.out</value></fval>
+	<fval name="includeHeaders"><value>0</value></fval>
+	<fval name="includeRequestLine"><value>0</value></fval>
+	<fval name="logFailure"><value>Filter failed</value></fval>
+	<fval name="logFatal"><value>Filter aborted due to exception</value></fval>
+	<fval name="logMask"><value>2</value></fval>
+	<fval name="logMaskType"><value>SERVICE</value></fval>
+	<fval name="logSuccess"><value>Filter passed</value></fval>
+	<fval name="maxFileSize"><value>1000</value></fval>
+	<fval name="maxNumberFiles"><value>500</value></fval>
+	<fval name="name"><value>Persistence Details</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="ChangeMessageFilter">
+	<key type='CircuitContainer'>
+		<id field='name' value='Routing'/>
+		<key type='FilterCircuit'>
+			<id field='name' value='Content based Routing'/>
+		</key>
+	</key>
+	<fval name="abortProcessingOnLogError"><value>0</value></fval>
+	<fval name="body"><value>{ &quot;error&quot;: &quot;Invalid or no back-end service in request. Unable to route.&quot; }</value></fval>
+	<fval name="category"><value contentType="reference">
+		<key type='CategoryGroup'>
+			<id field='name' value='Filter Categories'/>
+			<key type='Category'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="logFailure"><value>Failed in setting the message</value></fval>
+	<fval name="logFatal"><value>Error in setting the message. Error: ${circuit.exception}</value></fval>
+	<fval name="logMask"><value>2</value></fval>
+	<fval name="logMaskType"><value>SERVICE</value></fval>
+	<fval name="logSuccess"><value>Success in setting the message</value></fval>
+	<fval name="name"><value>Set error message</value></fval>
+	<fval name="outputContentType"><value>application/json</value></fval>
+	<fval name="successNode"><value contentType="reference">
+		<key type='CircuitContainer'>
+			<id field='name' value='Routing'/>
+			<key type='FilterCircuit'>
+				<id field='name' value='Content based Routing'/>
+				<key type='Reflector'>
+					<id field='name' value='No Backend to route, return error message'/>
+				</key>
+			</key>
+		</key>
+	</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="ConnectToURLFilter">
+	<key type='CircuitContainer'>
+		<id field='name' value='Routing'/>
+		<key type='FilterCircuit'>
+			<id field='name' value='Content based Routing'/>
+		</key>
+	</key>
+	<fval name="abortProcessingOnLogError"><value>0</value></fval>
+	<fval name="body"><value>${content.body}</value></fval>
+	<fval name="caCerts"></fval>
+	<fval name="category"><value contentType="reference">
+		<key type='CategoryGroup'>
+			<id field='name' value='Filter Categories'/>
+			<key type='Category'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="ciphers"><value>DEFAULT</value></fval>
+	<fval name="connectionFailurePolicy"><value contentType="reference">-1</value></fval>
+	<fval name="forwardClientHostHeader"><value>0</value></fval>
+	<fval name="handleRedirects"><value>1</value></fval>
+	<fval name="logFailure"><value>Failed to route request to endpoint.</value></fval>
+	<fval name="logFatal"><value>Error occurred while routing request to endpoint. Error: ${circuit.exception}</value></fval>
+	<fval name="logMask"><value>2</value></fval>
+	<fval name="logMaskType"><value>SERVICE</value></fval>
+	<fval name="logSuccess"><value>Successfully routed request to endpoint</value></fval>
+	<fval name="method"><value>${http.request.verb}</value></fval>
+	<fval name="name"><value>Connect/Route to Exchange Rates API</value></fval>
+	<fval name="performRetries"><value>0</value></fval>
+	<fval name="profile"><value contentType="reference">-1</value></fval>
+	<fval name="protoHeaders"><value>${http.headers}</value></fval>
+	<fval name="proxyServer"><value contentType="reference">-1</value></fval>
+	<fval name="retryCount"><value>5</value></fval>
+	<fval name="retryHTTPRanges"><value contentType="reference">-1</value></fval>
+	<fval name="retryLatency"><value>500</value></fval>
+	<fval name="runPolicyOnConnectionFailure"><value>0</value></fval>
+	<fval name="saveTransactionOnFailure"><value>0</value></fval>
+	<fval name="sendProxyMode"><value>0</value></fval>
+	<fval name="sendReceivedContentHeaders"><value>0</value></fval>
+	<fval name="slaBreachAsFailure"><value>0</value></fval>
+	<fval name="sslUsers"><value contentType="reference">-1</value></fval>
+	<fval name="ssloptions"></fval>
+	<fval name="stickyCookieDomain"><value></value></fval>
+	<fval name="stickyCookieExpiry"><value>600000</value></fval>
+	<fval name="stickyCookieName"><value>unnamed</value></fval>
+	<fval name="stickyCookiePath"><value></value></fval>
+	<fval name="stickyness"><value>0</value></fval>
+	<fval name="successNode"><value contentType="reference">-1</value></fval>
+	<fval name="transparentProxy"><value>0</value></fval>
+	<fval name="url"><value>http://api.fixer.io/latest</value></fval>
+	<fval name="useRootCerts"><value>1</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="SaveToFileFilter">
+	<key type='CircuitContainer'>
+		<id field='name' value='Routing'/>
+		<key type='FilterCircuit'>
+			<id field='name' value='Content based Routing'/>
+			<key type='ConnectToURLFilter'>
+				<id field='name' value='Connect/Route to Exchange Rates API'/>
+			</key>
+		</key>
+	</key>
+	<fval name="abortProcessingOnLogError"><value>0</value></fval>
+	<fval name="category"><value contentType="reference">
+		<key type='CategoryGroup'>
+			<id field='name' value='Filter Categories'/>
+			<key type='Category'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="directory"><value>${environment.VINSTDIR}/message-archive</value></fval>
+	<fval name="fileName"><value>${id}.out</value></fval>
+	<fval name="includeHeaders"><value>0</value></fval>
+	<fval name="includeRequestLine"><value>0</value></fval>
+	<fval name="logFailure"><value>Filter failed</value></fval>
+	<fval name="logFatal"><value>Filter aborted due to exception</value></fval>
+	<fval name="logMask"><value>2</value></fval>
+	<fval name="logMaskType"><value>SERVICE</value></fval>
+	<fval name="logSuccess"><value>Filter passed</value></fval>
+	<fval name="maxFileSize"><value>1000</value></fval>
+	<fval name="maxNumberFiles"><value>500</value></fval>
+	<fval name="name"><value>Persistence Details</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="Reflector">
+	<key type='CircuitContainer'>
+		<id field='name' value='Routing'/>
+		<key type='FilterCircuit'>
+			<id field='name' value='Content based Routing'/>
+		</key>
+	</key>
+	<fval name="abortProcessingOnLogError"><value>0</value></fval>
+	<fval name="category"><value contentType="reference">
+		<key type='CategoryGroup'>
+			<id field='name' value='Filter Categories'/>
+			<key type='Category'>
+				<id field='name' value='miscellaneous'/>
+			</key>
+		</key>
+	</value></fval>
+	<fval name="httpResponseStatus"><value>401</value></fval>
+	<fval name="logFailure"><value>Failed to echo back the message</value></fval>
+	<fval name="logFatal"><value>Error occurred while echoing the message. Error: ${circuit.exception}</value></fval>
+	<fval name="logMask"><value>2</value></fval>
+	<fval name="logMaskType"><value>SERVICE</value></fval>
+	<fval name="logSuccess"><value>Successfully echoed back the message</value></fval>
+	<fval name="name"><value>No Backend to route, return error message</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="CircuitContainer">
+	<fval name="name"><value>Routing</value></fval>
+</entity>
+<entity xmlns="http://www.vordel.com/2005/06/24/entityStore"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" type="ESConfiguration">
+	<fval name="name"><value>Entity Store Configuration</value></fval>
+	<fval name="passphraseTest"><value>aHR0cDsvL3d3dy52b3JkZWwuY29t</value></fval>
+	<fval name="productKey"><value>VordelGateway</value></fval>
+	<fval name="version"><value>7.5.3</value></fval>
 </entity>
 </entityStoreData>
