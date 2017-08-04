@@ -72,7 +72,6 @@ Please read [Contributing.md][contrib] for details on our code of conduct, and t
 
 
 ## License
-Apache License 2.0 (refer to document [license][licenselink])
+[Apache License 2.0](/LICENSE)
 
-[licenselink]: /LICENSE
 
